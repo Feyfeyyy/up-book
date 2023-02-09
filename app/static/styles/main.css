@@ -1,0 +1,181 @@
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: linear-gradient(45deg, rgba(66, 183, 245, 0.8) 0%, rgba(66, 245, 189, 0.4) 100%);
+  color: rgba(0, 0, 0, 0.6);
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  line-height: 1.6em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.overlay, .form-panel.one:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  background: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  height: 100%;
+}
+
+.form {
+  z-index: 15;
+  position: relative;
+  background: #FFFFFF;
+  width: 600px;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  margin: 100px auto 10px;
+  overflow: hidden;
+}
+.form-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 0 20px;
+}
+.form-group:last-child {
+  margin: 0;
+}
+.form-group label {
+  display: block;
+  margin: 0 0 10px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.two .form-group label {
+  color: #FFFFFF;
+}
+.form-group input {
+  outline: none;
+  display: block;
+  background: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 12px 20px;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  transition: 0.3s ease;
+}
+.form-group input:focus {
+  color: rgba(0, 0, 0, 0.8);
+}
+.two .form-group input {
+  color: #FFFFFF;
+}
+.two .form-group input:focus {
+  color: #FFFFFF;
+}
+.form-group button {
+  outline: none;
+  background: #135ad3;
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  padding: 12px 20px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.two .form-group button {
+  background: #FFFFFF;
+  color: #135ad3;
+}
+.form-group .form-remember {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.form-group .form-remember input[type=checkbox] {
+  display: inline-block;
+  width: auto;
+  margin: 0 10px 0 0;
+}
+.form-group .form-recovery {
+  color: #135ad3;
+  font-size: 12px;
+  text-decoration: none;
+}
+.form-panel {
+  padding: 60px;
+  box-sizing: border-box;
+}
+.form-header {
+    display: flex;
+    justify-content: center;
+}
+.form-header h1 {
+  padding: 4px 0;
+  color: #135ad3;
+  font-size: 24px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.two .form-header h1 {
+  position: relative;
+  z-index: 40;
+  color: #FFFFFF;
+}
+.csv-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #050505;
+}
+.cp-fab {
+  background: #FFFFFF !important;
+  color: #135ad3 !important;
+}
+hr.rounded {
+  border-top: 5px solid #135ad3;
+  border-radius: 5px;
+  width: 80%;
+}
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+.styled-table thead tr {
+    background-color: #135ad3;
+    color: #ffffff;
+    text-align: left;
+}
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+.styled-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #135ad3;
+}

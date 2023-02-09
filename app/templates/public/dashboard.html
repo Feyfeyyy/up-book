@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+    <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+</head>
+<body>
+
+<!-- Form-->
+<div class="form">
+  <div class="form-panel one">
+    <div class="form-header">
+      <h1>Welcome {{ email }}</h1>
+    </div>
+      <div class="csv-box">
+          <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Book Author</th>
+                    <th>Date Published</th>
+                    <th>ISBN</th>
+                    <th>Publisher Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in datelist %}
+                <tr>
+                    <td> {{ row[0] }} </td>
+                    <td> {{ row[1] }} </td>
+                    <td> {{ row[2] }} </td>
+                    <td> {{ row[3] }} </td>
+                    <td> {{ row[4] }} </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Failed CSV Upload</title>
+    <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+</head>
+  <body>
+  <div class="form">
+      <div class="form-header">
+          <h1>Upload Book Info</h1>
+      </div>
+      <div class="form-header">
+          <p style="color: #4285F4; font-size: 16px;">Thank you for registering please upload a csv containing the books information</p>
+      </div>
+      <hr class="rounded">
+      <div class="csv-box">
+          <p style="color: red">Oops something went wrong.. </p>
+          <p style="color: red"> {{message}} </p>
+          <p style="color: red">Please make sure the csv file is in the following format:</p>
+          <ul style="color: red">
+              <li>Book Title</li>
+              <li>Book Author</li>
+              <li>Date Published</li>
+              <li>Valid ISBN</li>
+              <li>Publisher Name</li>
+          </ul>
+        </div>
+      <div class="form-content" style="display: flex; padding: 20px; justify-content: center;">
+        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" id="myFile" name="uploaded-file" accept=".csv">
+            <input type="submit" value="Upload file">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
