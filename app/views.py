@@ -1,33 +1,26 @@
 import csv
 import hashlib
-import os
 import json
+import os
 import uuid
-import pandas as pd
 
 import boto3
+import pandas as pd
 import psycopg2
-from flask import redirect, render_template, request, session
+from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
 from app import app
 from app.methods import validate_isbn
-from app.sql_config import (
-    CHECK_ACCOUNTS,
-    CREATE_ACCOUNTS_TABLE,
-    CREATE_BOOKS_TABLE,
-    CREATE_PUBLISHERS_TABLE,
-    CREATE_S3_TABLE,
-    INSERT_ACCOUNTS,
-    INSERT_BOOKS,
-    INSERT_PUBLISHERS,
-    INSERT_S3_TABLE,
-    SELECT_ACCOUNT_ID
-)
+from app.sql_config import (CHECK_ACCOUNTS, CREATE_ACCOUNTS_TABLE,
+                            CREATE_BOOKS_TABLE, CREATE_PUBLISHERS_TABLE,
+                            CREATE_S3_TABLE, INSERT_ACCOUNTS, INSERT_BOOKS,
+                            INSERT_PUBLISHERS, INSERT_S3_TABLE,
+                            SELECT_ACCOUNT_ID)
 
 SESSION = boto3.Session(
-    aws_access_key_id="",
-    aws_secret_access_key="",
+    aws_access_key_id="AKIA2FWH2S2JARWY3O6R",
+    aws_secret_access_key="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",
 )
 S3 = SESSION.resource("s3")
 
@@ -37,7 +30,7 @@ BUCKET_NAME = "ubiquity-rest-api"
 
 
 @app.route("/", methods=["GET", "POST"])
-def homepage():
+def homepage() -> str | Response:
     """
     homepage: This function is used to render the homepage of the application.
     """
@@ -51,12 +44,12 @@ def homepage():
     return app.response_class(
         response=json.dumps({"message": "Internal Server Error"}),
         status=500,
-        mimetype='application/json'
+        mimetype="application/json",
     )
 
 
 @app.route("/login", methods=["GET", "POST"])
-def login():
+def login() -> str | Response:
     """
     login: This function is used to render the login page of the application.
     """
@@ -84,12 +77,12 @@ def login():
     return app.response_class(
         response=json.dumps({"message": "Internal Server Error"}),
         status=500,
-        mimetype='application/json'
+        mimetype="application/json",
     )
 
 
 @app.route("/register", methods=["GET", "POST"])
-def register():
+def register() -> str | Response:
     """
     register: This function is used to render the register page of the application.
     """
@@ -121,12 +114,12 @@ def register():
     return app.response_class(
         response=json.dumps({"message": "Internal Server Error"}),
         status=500,
-        mimetype='application/json'
+        mimetype="application/json",
     )
 
 
 @app.route("/upload", methods=["GET", "POST"])
-def upload():
+def upload() -> str | Response:
     """
     upload: This function is used to render the upload page of the application.
     """
@@ -178,7 +171,9 @@ def upload():
             location = S3.meta.client.get_bucket_location(Bucket=BUCKET_NAME)[
                 "LocationConstraint"
             ]
-            session["s3_url"] = f"https://{BUCKET_NAME}.s3.{location}.amazonaws.com/{s3_file_name}"
+            session[
+                "s3_url"
+            ] = f"https://{BUCKET_NAME}.s3.{location}.amazonaws.com/{s3_file_name}"
             session["uploaded_data_file_path"] = os.path.join(
                 app.config["UPLOAD_FOLDER"], csv_file.filename
             )
@@ -189,12 +184,12 @@ def upload():
     return app.response_class(
         response=json.dumps({"message": "Internal Server Error"}),
         status=500,
-        mimetype='application/json'
+        mimetype="application/json",
     )
 
 
 @app.route("/filedata", methods=["GET", "POST"])
-def file_data():
+def file_data() -> str | Response:
     """
     file_data: This function is used to render the file data page of the application.
     """
@@ -209,27 +204,34 @@ def file_data():
             account_id = cursor.fetchone()[0]
             cursor.execute(
                 INSERT_S3_TABLE,
-                (
-                    BUCKET_NAME,
-                    session["s3_file_name"],
-                    session["s3_url"],
-                    account_id
-                ),
+                (BUCKET_NAME, session["s3_file_name"], session["s3_url"], account_id),
             )
     if request.method == "POST":
         return render_template("public/dashboard.html", email=session["email"])
     elif request.method == "GET":
-        return render_template("public/book_data.html", title=csv_filename, datelist=datelist)
+        return render_template(
+            "public/book_data.html", title=csv_filename, datelist=datelist
+        )
     return app.response_class(
         response=json.dumps({"message": "Internal Server Error"}),
         status=500,
-        mimetype='application/json'
+        mimetype="application/json",
     )
 
 
 @app.route("/dashboard", methods=["GET", "POST"])
-def dashboard():
+def dashboard() -> str | Response:
     """
     dashboard: This function is used to render the dashboard page of the application.
     """
-    return render_template("public/dashboard.html", email=session["email"])
+    if session.get("email", None) is None:
+        return redirect("/login")
+    elif request.method == "POST":
+        return "Hello"
+    elif request.method == "GET":
+        return render_template("public/dashboard.html", email=session["email"])
+    return app.response_class(
+        response=json.dumps({"message": "Internal Server Error"}),
+        status=500,
+        mimetype="application/json",
+    )
