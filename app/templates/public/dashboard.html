@@ -1,44 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard</title>
-    <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
-</head>
-<body>
-
-<!-- Form-->
-<div class="form">
-  <div class="form-panel one">
-    <div class="form-header">
-      <h1>Welcome {{ email }}</h1>
-    </div>
-      <div class="csv-box">
-          <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Book Title</th>
-                    <th>Book Author</th>
-                    <th>Date Published</th>
-                    <th>ISBN</th>
-                    <th>Publisher Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in datelist %}
-                <tr>
-                    <td> {{ row[0] }} </td>
-                    <td> {{ row[1] }} </td>
-                    <td> {{ row[2] }} </td>
-                    <td> {{ row[3] }} </td>
-                    <td> {{ row[4] }} </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-          </table>
-        </div>
-  </div>
-</div>
-</body>
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Dashboard</title>
+      <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+   </head>
+   <body>
+      <!-- Form-->
+      <div class="form">
+         <nav class="navbar">
+            <div class="logo">Ubiquity Press</div>
+            <ul class="nav-links">
+               <div class="menu">
+                  <li style="list-style: none"><a href="/logout">Signout</a></li>
+               </div>
+            </ul>
+         </nav>
+         <div class="form-panel one">
+            <div>
+               <div class="row">
+                  <div>
+                     <div style="display: flex; flex-direction: column; align-items: center;">
+                        <img width="150px" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+                        <span>Welcome {{ email }}!</span>
+                     </div>
+                  </div>
+                  <div>
+                     <div>
+                        <div>
+                           <h4 class="text-right">My Uploaded Books</h4>
+                        </div>
+                        <div class="mybook-box">
+                           <table class="styled-book-table">
+                              <thead>
+                                 <tr>
+                                    <th>Book Name</th>
+                                    <th>Uploaded Date</th>
+                                    <th>View</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 {% for row in user_books %}
+                                 <tr>
+                                    <td> {{ row[0][37:-4] }} </td>
+                                    <td> {{ row[1].strftime('%d-%b-%Y') }} </td>
+                                 </tr>
+                                 {% endfor %}
+                              </tbody>
+                           </table>
+                        </div>
+                        <hr class="rounded">
+                        <div class="csv-box">
+                           <p style="color: red"> {{ message }} </p>
+                           <p>If you want to add another book</p>
+                           <p>Please make sure you upload a csv file in the following format:</p>
+                           <ul>
+                              <li>Book Title</li>
+                              <li>Book Author</li>
+                              <li>Date Published</li>
+                              <li>Valid ISBN</li>
+                              <li>Publisher Name</li>
+                           </ul>
+                        </div>
+                        <div class="form-content" style="display: flex; padding: 20px; justify-content: center;">
+                           <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+                              <input type="file" id="myFile" name="uploaded-file" accept=".csv">
+                              <input type="submit" value="Upload file">
+                           </form>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      </div>
+   </body>
 </html>
