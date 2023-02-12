@@ -12,11 +12,19 @@ from loguru import logger
 
 from app import app
 from app.methods import validate_isbn
-from app.sql_config import (CHECK_ACCOUNTS, CREATE_ACCOUNTS_TABLE,
-                            CREATE_BOOKS_TABLE, CREATE_PUBLISHERS_TABLE,
-                            CREATE_S3_TABLE, INSERT_ACCOUNTS, INSERT_BOOKS,
-                            INSERT_PUBLISHERS, INSERT_S3_TABLE,
-                            SELECT_ACCOUNT_ID, SELECT_USERS_BOOKS)
+from app.sql_config import (
+    CHECK_ACCOUNTS,
+    CREATE_ACCOUNTS_TABLE,
+    CREATE_BOOKS_TABLE,
+    CREATE_PUBLISHERS_TABLE,
+    CREATE_S3_TABLE,
+    INSERT_ACCOUNTS,
+    INSERT_BOOKS,
+    INSERT_PUBLISHERS,
+    INSERT_S3_TABLE,
+    SELECT_ACCOUNT_ID,
+    SELECT_USERS_BOOKS,
+)
 
 SESSION = boto3.Session(
     aws_access_key_id="AKIA2FWH2S2JARWY3O6R",
