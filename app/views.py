@@ -7,6 +7,7 @@ import uuid
 import boto3
 import pandas as pd
 import psycopg2
+import requests
 from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
@@ -35,6 +36,9 @@ S3 = SESSION.resource("s3")
 connection = psycopg2.connect(app.config["DATABASE_URI"])
 
 BUCKET_NAME = "ubiquity-rest-api"
+
+WEBHOOK_REQUEST_URL = ""
+WEBHOOK_URL = ""
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -189,6 +193,19 @@ def upload() -> str | Response:
                 session["uploaded_data_file_path"] = os.path.join(
                     app.config["UPLOAD_FOLDER"], csv_file.filename
                 )
+                data = {
+                    "app_source": "Up-Book",
+                    "description": "Up-Book is a simple application to upload books data to S3 and store it in a database.",
+                    "csv_uploaded": True,
+                    "csv_filename": session["csv_filename"],
+                    "s3_url": session["s3_url"],
+                }
+                requests.post(
+                    WEBHOOK_REQUEST_URL,
+                    data=json.dumps(data),
+                    headers={"Content-Type": "application/json"},
+                )
+                logger.success("Posted to Webhook")
                 logger.success("File uploaded successfully")
                 return redirect("/filedata")
             except FileNotFoundError as err:
@@ -233,7 +250,10 @@ def file_data() -> str | Response:
             return redirect("/dashboard")
         elif request.method == "GET":
             return render_template(
-                "public/book_data.html", title=csv_filename, datelist=date_list
+                "public/book_data.html",
+                title=csv_filename,
+                datelist=date_list,
+                url=WEBHOOK_URL,
             )
     except ValueError as err:
         logger.error(err)
@@ -260,7 +280,9 @@ def dashboard() -> str | Response:
         date_list = list(data.values)
         with connection:
             with connection.cursor() as cursor:
-                cursor.execute(SELECT_USERS_BOOKS, ("2",))
+                cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
+                account_id = cursor.fetchone()[0]
+                cursor.execute(SELECT_USERS_BOOKS, (account_id,))
                 user_books = cursor.fetchall()
         if session.get("email", None) is None:
             return redirect("/login")
@@ -292,7 +314,6 @@ def logout() -> str | Response:
     session.pop("email", None)
     session.pop("password", None)
     session.pop("account_id", None)
-    session.pop("uploaded_data_file_path", None)
     session.pop("s3_file_name", None)
     session.pop("s3_url", None)
     session.pop("csv_filename", None)

@@ -1,49 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
-</head>
-  <body>
-  <div class="form">
-      <div class="form-header">
-          <h1>Book Data Information</h1>
-      </div>
-      <div class="form-header">
-          <p style="color: #4285F4; font-size: 16px;">You have submitted a csv, here is the books information</p>
-      </div>
-      <hr class="rounded">
-      <div class="csv-box">
-          <table class="styled-table">
-            <thead>
-                <tr>
-                    <th>Book Title</th>
-                    <th>Book Author</th>
-                    <th>Date Published</th>
-                    <th>ISBN</th>
-                    <th>Publisher Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in datelist %}
-                <tr>
-                    <td> {{ row[0] }} </td>
-                    <td> {{ row[1] }} </td>
-                    <td> {{ row[2] }} </td>
-                    <td> {{ row[3] }} </td>
-                    <td> {{ row[4] }} </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <div class="form-group" style="display: block">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>{{ title }}</title>
+      <link rel="stylesheet" type= "text/css" href="{{ url_for('static', filename='styles/main.css') }}">
+   </head>
+   <body>
+      <div class="form">
+         <div class="form-header">
+            <h1>Book Data Information</h1>
+         </div>
+         <div class="form-header">
+            <p style="color: #4285F4; font-size: 16px;">You have submitted a csv, here is the books information</p>
+         </div>
+         <hr class="rounded">
+         <div class="csv-box">
+            <table class="styled-table">
+               <thead>
+                  <tr>
+                     <th>Book Title</th>
+                     <th>Book Author</th>
+                     <th>Date Published</th>
+                     <th>ISBN</th>
+                     <th>Publisher Name</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {% for row in datelist %}
+                  <tr>
+                     <td> {{ row[0] }} </td>
+                     <td> {{ row[1] }} </td>
+                     <td> {{ row[2] }} </td>
+                     <td> {{ row[3] }} </td>
+                     <td> {{ row[4] }} </td>
+                  </tr>
+                  {% endfor %}
+               </tbody>
+            </table>
+         </div>
+         <div class="form-header">
+            <p style="color: #4285F4; font-size: 16px;">Please <a href="{{ url }}">click here</a> to view webhook integration</p>
+         </div>
+         <div class="form-group" style="display: block">
             <form action="{{ url_for('file_data') }}" method="POST">
-                <button type="submit" name="Dash" value="DASH">Continue To Dashboard</button>
+               <button type="submit" name="Dash" value="DASH">Continue To Dashboard</button>
             </form>
-        </div>
-    </div>
-  </body>
+         </div>
+      </div>
+   </body>
 </html>
