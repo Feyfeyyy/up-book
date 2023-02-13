@@ -35,17 +35,26 @@
                            <table class="styled-book-table">
                               <thead>
                                  <tr>
-                                    <th>Book Name</th>
+                                    <th>File Name</th>
                                     <th>Uploaded Date</th>
-                                    <th>View</th>
                                  </tr>
                               </thead>
                               <tbody>
                                  {% for row in user_books %}
                                  <tr>
-                                    <td> {{ row[0][37:-4] }} </td>
-                                    <td> {{ row[1].strftime('%d-%b-%Y') }} </td>
+                                    <td> {{ row[1][37:-4] }} </td>
+                                    <td> {{ row[2].strftime('%d-%b-%Y') }} </td>
                                  </tr>
+                                 {% for id in books_data %}
+                                 {% if row[0] == id[0] %}
+                                 <ul>
+                                    <li>Book Title : {{ id[1] }}</li>
+                                    <li>Book Author: {{ id[2] }}</li>
+                                    <li>Book Publisher Name: {{ id[3] }}</li>
+                                    <li>Book Publisher Date: {{ id[4] }}</li>
+                                 </ul>
+                                 {% endif %}
+                                 {% endfor %}
                                  {% endfor %}
                               </tbody>
                            </table>

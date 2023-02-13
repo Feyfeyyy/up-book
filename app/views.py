@@ -25,6 +25,7 @@ from app.sql_config import (
     INSERT_S3_TABLE,
     SELECT_ACCOUNT_ID,
     SELECT_USERS_BOOKS,
+    SELECT_MATCH_USER_BOOKS
 )
 
 SESSION = boto3.Session(
@@ -140,6 +141,9 @@ def upload() -> str | Response:
                     with connection.cursor() as cursor:
                         cursor.execute(CREATE_BOOKS_TABLE)
                         cursor.execute(CREATE_PUBLISHERS_TABLE)
+                        cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
+                        account_id = cursor.fetchone()[0]
+                        session["account_id"] = account_id
                 csv_file = request.files["uploaded-file"]
                 csv_file.save(
                     os.path.join(app.config["UPLOAD_FOLDER"], csv_file.filename)
@@ -165,7 +169,7 @@ def upload() -> str | Response:
                         with connection:
                             with connection.cursor() as cursor:
                                 cursor.execute(
-                                    INSERT_BOOKS, (row["ï»¿Book Title"], row["ISBN"])
+                                    INSERT_BOOKS, (row["Book Title"], row["ISBN"], session["account_id"])
                                 )
                                 book_id = cursor.fetchone()[0]
                                 cursor.execute(
@@ -235,16 +239,13 @@ def file_data() -> str | Response:
             with connection:
                 with connection.cursor() as cursor:
                     cursor.execute(CREATE_S3_TABLE)
-                    cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
-                    account_id = cursor.fetchone()[0]
-                    session["account_id"] = account_id
                     cursor.execute(
                         INSERT_S3_TABLE,
                         (
                             BUCKET_NAME,
                             session["s3_file_name"],
                             session["s3_url"],
-                            account_id,
+                            session["account_id"],
                         ),
                     )
             return redirect("/dashboard")
@@ -269,28 +270,25 @@ def file_data() -> str | Response:
     )
 
 
-@app.route("/dashboard", methods=["GET", "POST"])
+@app.route("/dashboard", methods=["GET"])
 def dashboard() -> str | Response:
     """
     dashboard: This function is used to render the dashboard page of the application.
     """
     try:
-        data_file_path = session.get("uploaded_data_file_path", None)
-        data = pd.read_csv(data_file_path, header=0)
-        date_list = list(data.values)
         with connection:
             with connection.cursor() as cursor:
                 cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
                 account_id = cursor.fetchone()[0]
                 cursor.execute(SELECT_USERS_BOOKS, (account_id,))
                 user_books = cursor.fetchall()
+                cursor.execute(SELECT_MATCH_USER_BOOKS, (account_id,))
+                match_user_books = cursor.fetchall()
         if session.get("email", None) is None:
             return redirect("/login")
-        elif request.method == "POST":
-            return "Hello"
         elif request.method == "GET":
             return render_template(
-                "public/dashboard.html", email=session["email"], user_books=user_books
+                "public/dashboard.html", email=session["email"], user_books=user_books, books_data=match_user_books
             )
     except ValueError as err:
         logger.error(err)

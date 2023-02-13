@@ -137,6 +137,10 @@ body {
     align-items: center;
     color: #050505;
 }
+.mybook-box {
+    display: flex;
+    flex-direction: column;
+}
 .cp-fab {
   background: #FFFFFF !important;
   color: #135ad3 !important;
