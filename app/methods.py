@@ -15,7 +15,7 @@ def validate_isbn(isbn: str) -> bool:
             sums += (i + 1) * int(isbn[i])
         check = sums % 11
         if check == 10:
-            check = 'X'
+            check = "X"
         else:
             check = str(check)
         if isbn[9] != check:
