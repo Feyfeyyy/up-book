@@ -1,4 +1,5 @@
 import secrets
+
 from app.environment import API_KEY, DATABASE_URI, SECRET_KEY
 
 

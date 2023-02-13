@@ -29,8 +29,8 @@ from app.sql_config import (
 )
 
 SESSION = boto3.Session(
-    aws_access_key_id="AKIA2FWH2S2JARWY3O6R",
-    aws_secret_access_key="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",
+    aws_access_key_id=app.config["DATABASE_URI"],
+    aws_secret_access_key=app.config["DATABASE_URI"],
 )
 S3 = SESSION.resource("s3")
 
@@ -38,8 +38,8 @@ connection = psycopg2.connect(app.config["DATABASE_URI"])
 
 BUCKET_NAME = "ubiquity-rest-api"
 
-WEBHOOK_REQUEST_URL = ""
-WEBHOOK_URL = ""
+WEBHOOK_REQUEST_URL = app.config["WEBHOOK_REQUEST_URL"]
+WEBHOOK_URL = app.config["WEBHOOK_URL"]
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -47,6 +47,8 @@ def homepage() -> str | Response:
     """
     homepage: This function is used to render the homepage of the application.
     """
+    print(app.config["WEBHOOK_REQUEST_URL"])
+    print(app.config["WEBHOOK_URL"])
     if request.method == "POST":
         if request.form.get("Login") == "LOG":
             return redirect("/login")
