@@ -53,9 +53,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.2em;
 }
-.two .form-group label {
-  color: #FFFFFF;
-}
 .form-group input {
   outline: none;
   display: block;
@@ -75,12 +72,6 @@ body {
 .form-group input:focus {
   color: rgba(0, 0, 0, 0.8);
 }
-.two .form-group input {
-  color: #FFFFFF;
-}
-.two .form-group input:focus {
-  color: #FFFFFF;
-}
 .form-group button {
   outline: none;
   background: #135ad3;
@@ -95,10 +86,6 @@ body {
   line-height: inherit;
   text-transform: uppercase;
   cursor: pointer;
-}
-.two .form-group button {
-  background: #FFFFFF;
-  color: #135ad3;
 }
 .form-group .form-remember {
   font-size: 12px;
