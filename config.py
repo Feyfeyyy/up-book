@@ -1,10 +1,14 @@
 import secrets
 
+from app.environment import API_KEY, DATABASE_URI, SECRET_KEY
+
 
 class Config(object):
     DEBUG = False
     TESTING = False
-    DATABASE_URI = "sqlite:///database.db"
+    API_KEY = API_KEY
+    SECRET_KEY = SECRET_KEY
+    DATABASE_URI = DATABASE_URI
     ALLOWED_EXTENSIONS = ["CSV"]
     UPLOAD_FOLDER = "app/static/uploads"
     SESSION_COOKIE_SECURE = True
@@ -20,7 +24,6 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     ENV = "development"
     DEBUG = True
-    DATABASE_URI = "sqlite:///database.db"
     SESSION_COOKIE_SECURE = False
     SESSION_PERMANENT = True
 
@@ -29,6 +32,5 @@ class TestingConfig(Config):
     ENV = "testing"
     DEBUG = True
     TESTING = True
-    DATABASE_URI = "sqlite:///database.db"
     SESSION_COOKIE_SECURE = False
     SESSION_PERMANENT = True

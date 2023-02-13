@@ -1,6 +1,9 @@
+from dotenv import load_dotenv
 from flask import Flask
 
+load_dotenv(".env")
 app = Flask(__name__)
+app.config.from_pyfile("environment.py")
 
 if app.config["ENV"] == "production":
     app.config.from_object("config.ProductionConfig")

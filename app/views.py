@@ -29,17 +29,17 @@ from app.sql_config import (
 )
 
 SESSION = boto3.Session(
-    aws_access_key_id="AKIA2FWH2S2JARWY3O6R",
-    aws_secret_access_key="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",
+    aws_access_key_id=app.config["API_KEY"],
+    aws_secret_access_key=app.config["SECRET_KEY"],
 )
 S3 = SESSION.resource("s3")
 
-connection = psycopg2.connect(app.config["DATABASE_URI"])
+CONNECTION = psycopg2.connect(app.config["DATABASE_URI"])
 
 BUCKET_NAME = "ubiquity-rest-api"
 
-WEBHOOK_REQUEST_URL = ""
-WEBHOOK_URL = ""
+WEBHOOK_REQUEST_URL = app.config["WEBHOOK_REQUEST_URL"]
+WEBHOOK_URL = app.config["WEBHOOK_URL"]
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -69,8 +69,8 @@ def login() -> str | Response:
     if request.method == "POST":
         session["email"] = request.form.get("email")
         session["password"] = request.form.get("password")
-        with connection:
-            with connection.cursor() as cursor:
+        with CONNECTION:
+            with CONNECTION.cursor() as cursor:
                 cursor.execute(CREATE_ACCOUNTS_TABLE)
                 cursor.execute(CHECK_ACCOUNTS, (session["email"],))
                 account = cursor.fetchone()
@@ -105,8 +105,8 @@ def register() -> str | Response:
         session["email"] = request.form["email"]
         session["password"] = request.form["password"]
         session["password"] = hashlib.md5(session["password"].encode()).hexdigest()
-        with connection:
-            with connection.cursor() as cursor:
+        with CONNECTION:
+            with CONNECTION.cursor() as cursor:
                 cursor.execute(CREATE_ACCOUNTS_TABLE)
                 cursor.execute(CHECK_ACCOUNTS, (session["email"],))
                 account = cursor.fetchone()
@@ -137,8 +137,8 @@ def upload() -> str | Response:
     if request.method == "POST":
         if request.files:
             try:
-                with connection:
-                    with connection.cursor() as cursor:
+                with CONNECTION:
+                    with CONNECTION.cursor() as cursor:
                         cursor.execute(CREATE_BOOKS_TABLE)
                         cursor.execute(CREATE_PUBLISHERS_TABLE)
                         cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
@@ -166,8 +166,8 @@ def upload() -> str | Response:
                             return render_template(
                                 "public/fail_upload.html", message=message
                             )
-                        with connection:
-                            with connection.cursor() as cursor:
+                        with CONNECTION:
+                            with CONNECTION.cursor() as cursor:
                                 cursor.execute(
                                     INSERT_BOOKS,
                                     (
@@ -241,8 +241,8 @@ def file_data() -> str | Response:
         data = pd.read_csv(data_file_path, header=0)
         date_list = list(data.values)
         if request.method == "POST":
-            with connection:
-                with connection.cursor() as cursor:
+            with CONNECTION:
+                with CONNECTION.cursor() as cursor:
                     cursor.execute(CREATE_S3_TABLE)
                     cursor.execute(
                         INSERT_S3_TABLE,
@@ -281,8 +281,8 @@ def dashboard() -> str | Response:
     dashboard: This function is used to render the dashboard page of the application.
     """
     try:
-        with connection:
-            with connection.cursor() as cursor:
+        with CONNECTION:
+            with CONNECTION.cursor() as cursor:
                 cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
                 account_id = cursor.fetchone()[0]
                 cursor.execute(SELECT_USERS_BOOKS, (account_id,))
