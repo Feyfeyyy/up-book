@@ -4,7 +4,6 @@ import secrets
 class Config(object):
     DEBUG = False
     TESTING = False
-    SECRET_KEY = "secret"
     DATABASE_URI = "sqlite:///database.db"
     ALLOWED_EXTENSIONS = ["CSV"]
     UPLOAD_FOLDER = "app/static/uploads"

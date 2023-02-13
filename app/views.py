@@ -24,8 +24,8 @@ from app.sql_config import (
     INSERT_PUBLISHERS,
     INSERT_S3_TABLE,
     SELECT_ACCOUNT_ID,
+    SELECT_MATCH_USER_BOOKS,
     SELECT_USERS_BOOKS,
-    SELECT_MATCH_USER_BOOKS
 )
 
 SESSION = boto3.Session(
@@ -169,7 +169,12 @@ def upload() -> str | Response:
                         with connection:
                             with connection.cursor() as cursor:
                                 cursor.execute(
-                                    INSERT_BOOKS, (row["Book Title"], row["ISBN"], session["account_id"])
+                                    INSERT_BOOKS,
+                                    (
+                                        row["Book Title"],
+                                        row["ISBN"],
+                                        session["account_id"],
+                                    ),
                                 )
                                 book_id = cursor.fetchone()[0]
                                 cursor.execute(
@@ -288,7 +293,10 @@ def dashboard() -> str | Response:
             return redirect("/login")
         elif request.method == "GET":
             return render_template(
-                "public/dashboard.html", email=session["email"], user_books=user_books, books_data=match_user_books
+                "public/dashboard.html",
+                email=session["email"],
+                user_books=user_books,
+                books_data=match_user_books,
             )
     except ValueError as err:
         logger.error(err)

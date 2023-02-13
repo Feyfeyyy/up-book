@@ -5,7 +5,7 @@ FROM python:3.9-alpine
 WORKDIR /app
 
 # Copy the project files to the container
-COPY . .
+COPY app .
 
 # Copy the .env file to the container
 COPY .env /app/
