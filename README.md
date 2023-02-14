@@ -13,7 +13,7 @@ A simple, modern and elegant platform that connects book lovers to the books the
 - AWS S3
 - Webhooks
 
-## Installation
+## Local Deployment
 ( Recommended Pycharm For Easier Installation )
 - Clone the repository
     ```
