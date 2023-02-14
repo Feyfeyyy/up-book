@@ -14,7 +14,7 @@ A simple, modern and elegant platform that connects book lovers to the books the
 - Webhooks
 
 ## Local Deployment
-( Recommended Pycharm For Easier Installation )
+( Recommended Pycharm for easier deployment )
 - Clone the repository
     ```
     git clone https://github.com/Feyfeyyy/up-book.git
