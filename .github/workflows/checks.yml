@@ -33,3 +33,8 @@ jobs:
 
     - name: Check Imports with Isort
       run: isort --check-only .
+
+    - name: Post Check Cleanup
+      run: |
+        git diff --exit-code || git reset --hard
+        git diff --exit-code || exit 1
