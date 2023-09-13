@@ -1,4 +1,4 @@
-name: Black and Isort Check
+name: Black and Isort Checks
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - "*"
 
 jobs:
-  format-check:
-    name: Python Formatting Check
+  format:
+    name: Formatting Python Code
     runs-on: ubuntu-latest
 
     steps:
