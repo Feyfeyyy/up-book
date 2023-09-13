@@ -1,0 +1,37 @@
+name: Black and Isort Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Lint Python Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install Dependencies
+      run: pip install black isort
+
+    - name: Check Formatting with Black
+      run: black --check .
+
+    - name: Check Imports with isort
+      run: isort --check-only .
+
+    - name: Post Check Cleanup
+      run: |
+        git diff --exit-code || git reset --hard
+        git diff --exit-code || exit 1
