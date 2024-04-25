@@ -29,8 +29,8 @@ from app.sql_config import (
 )
 
 SESSION = boto3.Session(
-    aws_access_key_id=app.config["API_KEY"],
-    aws_secret_access_key=app.config["SECRET_KEY"],
+    aws_access_key_id=app.config["AWS_API_KEY"],
+    aws_secret_access_key=app.config["AWS_SECRET_KEY"]
 )
 S3 = SESSION.resource("s3")
 
@@ -105,6 +105,7 @@ def register() -> str | Response:
         session["email"] = request.form["email"]
         session["password"] = request.form["password"]
         session["password"] = hashlib.md5(session["password"].encode()).hexdigest()
+        logger.info(app.config["UPLOAD_FOLDER"])
         with CONNECTION:
             with CONNECTION.cursor() as cursor:
                 cursor.execute(CREATE_ACCOUNTS_TABLE)
