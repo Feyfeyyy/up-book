@@ -1,16 +1,19 @@
 import secrets
+from pathlib import Path
 
-from app.environment import API_KEY, DATABASE_URI, SECRET_KEY
+from app.environment import AWS_API_KEY, DATABASE_URI, AWS_SECRET_KEY
+
+RELATIVE_UPLOAD_FOLDER = Path("app/static/uploads")
 
 
 class Config(object):
     DEBUG = False
     TESTING = False
-    API_KEY = API_KEY
-    SECRET_KEY = SECRET_KEY
+    AWS_API_KEY = AWS_API_KEY
+    AWS_SECRET_KEY = AWS_SECRET_KEY
     DATABASE_URI = DATABASE_URI
     ALLOWED_EXTENSIONS = ["CSV"]
-    UPLOAD_FOLDER = "app/static/uploads"
+    UPLOAD_FOLDER = Path(__file__).resolve().parent / RELATIVE_UPLOAD_FOLDER
     SESSION_COOKIE_SECURE = True
     SESSION_PERMANENT = False
     SESSION_TYPE = "filesystem"
