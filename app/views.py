@@ -105,7 +105,6 @@ def register() -> str | Response:
         session["email"] = request.form["email"]
         session["password"] = request.form["password"]
         session["password"] = hashlib.md5(session["password"].encode()).hexdigest()
-        logger.info(app.config["UPLOAD_FOLDER"])
         with CONNECTION:
             with CONNECTION.cursor() as cursor:
                 cursor.execute(CREATE_ACCOUNTS_TABLE)
