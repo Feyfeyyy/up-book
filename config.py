@@ -1,7 +1,7 @@
 import secrets
 from pathlib import Path
 
-from app.environment import AWS_API_KEY, DATABASE_URI, AWS_SECRET_KEY
+from app.environment import AWS_API_KEY, AWS_SECRET_KEY, DATABASE_URI
 
 RELATIVE_UPLOAD_FOLDER = Path("app/static/uploads")
 
