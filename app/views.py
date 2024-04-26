@@ -30,7 +30,7 @@ from app.sql_config import (
 
 SESSION = boto3.Session(
     aws_access_key_id=app.config["AWS_API_KEY"],
-    aws_secret_access_key=app.config["AWS_SECRET_KEY"]
+    aws_secret_access_key=app.config["AWS_SECRET_KEY"],
 )
 S3 = SESSION.resource("s3")
 
