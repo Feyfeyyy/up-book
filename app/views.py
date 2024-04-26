@@ -12,7 +12,7 @@ from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
 from app import app
-from app.methods import validate_isbn
+from app.isbn import validate_isbn
 from app.sql_config import (
     CHECK_ACCOUNTS,
     CREATE_ACCOUNTS_TABLE,
