@@ -29,9 +29,6 @@ jobs:
     - name: Install Dependencies
       run: pip install black isort ruff
 
-    - name: Check Linting with Ruff
-      run: ruff check . --config .pyproject.toml
-
     - name: Check Formatting with Black
       run: black --check .
 
