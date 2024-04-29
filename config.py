@@ -1,12 +1,13 @@
 import secrets
 from pathlib import Path
 
-from app.environment import AWS_API_KEY, DATABASE_URI, AWS_SECRET_KEY
+from app.environment import AWS_API_KEY, AWS_SECRET_KEY, DATABASE_URI, ENV_KEY
 
 RELATIVE_UPLOAD_FOLDER = Path("app/static/uploads")
 
 
 class Config(object):
+    ENV = ENV_KEY
     DEBUG = False
     TESTING = False
     AWS_API_KEY = AWS_API_KEY
@@ -25,14 +26,12 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
-    ENV = "development"
     DEBUG = True
     SESSION_COOKIE_SECURE = False
     SESSION_PERMANENT = True
 
 
 class TestingConfig(Config):
-    ENV = "testing"
     DEBUG = True
     TESTING = True
     SESSION_COOKIE_SECURE = False

@@ -1,0 +1,41 @@
+name: Black, Ruff & Isort Checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Formatting Python Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Install Dependencies
+      run: pip install black isort ruff
+
+    - name: Check Imports with Isort
+      run: isort .
+
+    - name: Check Formatting with Black
+      run: black .
+
+    - name: Post Check Cleanup
+      run: |
+        git diff --exit-code || git reset --hard
+        git diff --exit-code || exit 1
