@@ -30,7 +30,7 @@ jobs:
       run: pip install black isort ruff
 
     - name: Check Linting with Ruff
-      run: ruff check .
+      run: ruff check . --config .ruff.yaml
 
     - name: Check Formatting with Black
       run: black --check .
