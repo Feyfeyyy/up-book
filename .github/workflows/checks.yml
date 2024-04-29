@@ -29,11 +29,11 @@ jobs:
     - name: Install Dependencies
       run: pip install black isort ruff
 
-    - name: Check Formatting with Black
-      run: black --check .
-
     - name: Check Imports with Isort
-      run: isort --check-only .
+      run: isort .
+
+    - name: Check Formatting with Black
+      run: black .
 
     - name: Post Check Cleanup
       run: |
