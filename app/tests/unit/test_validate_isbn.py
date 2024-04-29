@@ -1,6 +1,6 @@
 import pytest
 
-from app.isbn import validate_isbn
+from app.methods.isbn import validate_isbn
 
 
 @pytest.mark.parametrize(
