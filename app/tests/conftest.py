@@ -14,7 +14,11 @@ def s3_object():
     mock_client = Mock()
     mock_resource.meta.client.return_value = mock_client
 
-    s3_obj = S3Object(bucket_name='test_bucket', aws_access_key_id='access_key', aws_secret_access_key='secret_key')
+    s3_obj = S3Object(
+        bucket_name="test_bucket",
+        aws_access_key_id="access_key",
+        aws_secret_access_key="secret_key",
+    )
     s3_obj._connect_to_client = Mock(return_value=mock_client)
 
     yield s3_obj

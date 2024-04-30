@@ -3,15 +3,19 @@ from loguru import logger
 
 
 class S3Object:
-    def __init__(self, bucket_name: str, aws_access_key_id: str, aws_secret_access_key: str):
+    def __init__(
+        self, bucket_name: str, aws_access_key_id: str, aws_secret_access_key: str
+    ):
         self.bucket_name = bucket_name
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
 
     def _connect_to_client(self):
         try:
-            session = boto3.Session(aws_access_key_id=self.aws_access_key_id,
-                                    aws_secret_access_key=self.aws_secret_access_key)
+            session = boto3.Session(
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key,
+            )
             client = session.resource("s3")
             logger.success("Connected to AWS S3 client successfully")
             return client
@@ -31,7 +35,9 @@ class S3Object:
             logger.success(f"Location from bucket {self.bucket_name} is obtained.")
             return loc
         except Exception as e:
-            logger.error(f"Error retrieving location from bucket {self.bucket_name}: {e}")
+            logger.error(
+                f"Error retrieving location from bucket {self.bucket_name}: {e}"
+            )
             raise
 
     def upload_s3_file(self, path: str, key: str) -> bool:
@@ -41,5 +47,7 @@ class S3Object:
             logger.success(f"Uploaded {path} to {key} in bucket {self.bucket_name}")
             return True
         except Exception as e:
-            logger.error(f"Error uploading {path} to {key} in bucket {self.bucket_name}: {e}")
+            logger.error(
+                f"Error uploading {path} to {key} in bucket {self.bucket_name}: {e}"
+            )
             return False
