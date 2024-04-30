@@ -4,7 +4,6 @@ import json
 import os
 import uuid
 
-import boto3
 import pandas as pd
 import psycopg2
 import requests
@@ -12,6 +11,7 @@ from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
 from app import app
+from app.classes.aws import S3Object
 from app.methods.isbn import validate_isbn
 from app.sql_config import (
     CHECK_ACCOUNTS,
@@ -28,15 +28,11 @@ from app.sql_config import (
     SELECT_USERS_BOOKS,
 )
 
-SESSION = boto3.Session(
-    aws_access_key_id=app.config["AWS_API_KEY"],
-    aws_secret_access_key=app.config["AWS_SECRET_KEY"],
-)
-S3 = SESSION.resource("s3")
-
 CONNECTION = psycopg2.connect(app.config["DATABASE_URI"])
 
 BUCKET_NAME = "ubiquity-rest-api"
+
+S3 = S3Object(BUCKET_NAME, app.config["AWS_API_KEY"], app.config["AWS_SECRET_KEY"])
 
 WEBHOOK_REQUEST_URL = app.config["WEBHOOK_REQUEST_URL"]
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
@@ -186,16 +182,11 @@ def upload() -> str | Response:
                                         row["Date Published"],
                                     ),
                                 )
-                S3.meta.client.upload_file(
-                    Filename=os.path.join(
-                        app.config["UPLOAD_FOLDER"], csv_file.filename
-                    ),
-                    Bucket=BUCKET_NAME,
-                    Key=s3_file_name,
+                S3.upload_s3_file(
+                    session["uploaded_data_file_path"],
+                    s3_file_name
                 )
-                location = S3.meta.client.get_bucket_location(Bucket=BUCKET_NAME)[
-                    "LocationConstraint"
-                ]
+                location = S3.get_bucket_location()
                 session[
                     "s3_url"
                 ] = f"https://{BUCKET_NAME}.s3.{location}.amazonaws.com/{s3_file_name}"
@@ -215,7 +206,6 @@ def upload() -> str | Response:
                     headers={"Content-Type": "application/json"},
                 )
                 logger.success("Posted to Webhook")
-                logger.success("File uploaded successfully")
                 return redirect("/filedata")
             except FileNotFoundError as err:
                 logger.error(err)
