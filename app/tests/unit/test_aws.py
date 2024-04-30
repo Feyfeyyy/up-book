@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 
 
@@ -14,6 +16,18 @@ class TestAWSS3Object:
             "LocationConstraint": "us-west-1"
         }
         assert s3_object.get_bucket_location() == "us-west-1"
+
+    def test_get_bucket_location_failure(self, s3_object):
+        # Mocking the behavior of get_client() method
+        mock_client = Mock()
+        s3_object.get_client = Mock(return_value=mock_client)
+
+        mock_client.meta.client.get_bucket_location.side_effect = Exception(
+            "Location retrieval failed"
+        )
+
+        with pytest.raises(Exception):
+            s3_object.get_bucket_location()
 
     def test_upload_s3_file_success(self, s3_object):
         mock_client = s3_object.get_client()
