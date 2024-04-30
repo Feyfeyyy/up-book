@@ -4,14 +4,14 @@ import json
 import os
 import uuid
 
-import boto3
 import pandas as pd
 import psycopg2
-import requests
 from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
 from app import app
+from app.classes.aws import S3Object
+from app.classes.webhook import WebhookNotifier
 from app.methods.isbn import validate_isbn
 from app.sql_config import (
     CHECK_ACCOUNTS,
@@ -28,18 +28,12 @@ from app.sql_config import (
     SELECT_USERS_BOOKS,
 )
 
-SESSION = boto3.Session(
-    aws_access_key_id=app.config["AWS_API_KEY"],
-    aws_secret_access_key=app.config["AWS_SECRET_KEY"],
-)
-S3 = SESSION.resource("s3")
-
 CONNECTION = psycopg2.connect(app.config["DATABASE_URI"])
 
 BUCKET_NAME = "ubiquity-rest-api"
-
-WEBHOOK_REQUEST_URL = app.config["WEBHOOK_REQUEST_URL"]
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
+
+S3 = S3Object(BUCKET_NAME, app.config["AWS_API_KEY"], app.config["AWS_SECRET_KEY"])
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -186,36 +180,18 @@ def upload() -> str | Response:
                                         row["Date Published"],
                                     ),
                                 )
-                S3.meta.client.upload_file(
-                    Filename=os.path.join(
-                        app.config["UPLOAD_FOLDER"], csv_file.filename
-                    ),
-                    Bucket=BUCKET_NAME,
-                    Key=s3_file_name,
-                )
-                location = S3.meta.client.get_bucket_location(Bucket=BUCKET_NAME)[
-                    "LocationConstraint"
-                ]
+                S3.upload_s3_file(session["uploaded_data_file_path"], s3_file_name)
+                location = S3.get_bucket_location()
                 session[
                     "s3_url"
                 ] = f"https://{BUCKET_NAME}.s3.{location}.amazonaws.com/{s3_file_name}"
                 session["uploaded_data_file_path"] = os.path.join(
                     app.config["UPLOAD_FOLDER"], csv_file.filename
                 )
-                data = {
-                    "app_source": "Up-Book",
-                    "description": "Up-Book is a simple application to upload books data to S3 and store it in a database.",
-                    "csv_uploaded": True,
-                    "csv_filename": session["csv_filename"],
-                    "s3_url": session["s3_url"],
-                }
-                requests.post(
-                    WEBHOOK_REQUEST_URL,
-                    data=json.dumps(data),
-                    headers={"Content-Type": "application/json"},
+                webhook_notifier = WebhookNotifier(
+                    session["csv_filename"], session["s3_url"]
                 )
-                logger.success("Posted to Webhook")
-                logger.success("File uploaded successfully")
+                webhook_notifier.send_notification()
                 return redirect("/filedata")
             except FileNotFoundError as err:
                 logger.error(err)
