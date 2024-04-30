@@ -356,18 +356,18 @@ dotenv = ["python-dotenv"]
 
 [[package]]
 name = "flask-session"
-version = "0.4.0"
-description = "Adds server-side session support to your Flask application"
+version = "0.5.0"
+description = "Server-side session support for Flask"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "Flask-Session-0.4.0.tar.gz", hash = "sha256:c9ed54321fa8c4ca0132ffd3369582759eda7252fb4b3bee480e690d1ba41f46"},
-    {file = "Flask_Session-0.4.0-py2.py3-none-any.whl", hash = "sha256:1e3f8a317005db72c831f85d884a5a9d23145f256c730d80b325a3150a22c3db"},
+    {file = "Flask-Session-0.5.0.tar.gz", hash = "sha256:190875e6aebf2953c6803d42379ef3b934bc209ef8ef006f97aecb08f5aaeb86"},
+    {file = "flask_session-0.5.0-py3-none-any.whl", hash = "sha256:1619bcbc16f04f64e90f8e0b17145ba5c9700090bb1294e889956c1282d58631"},
 ]
 
 [package.dependencies]
 cachelib = "*"
-Flask = ">=0.8"
+flask = ">=2.2"
 
 [[package]]
 name = "gunicorn"
@@ -1021,4 +1021,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "fd24f34d40adf528cd4816fcb156e5f794bb3e9c3a9f91e6a8434b672149f0b7"
+content-hash = "6362f1ad89550e06fecdf73a7ee141f62995c6cf63316f20e8ab596260d51f9f"
