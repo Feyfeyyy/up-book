@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from app.classes.aws import S3Object
+from app.classes.webhook import WebhookNotifier
 
 
 @pytest.fixture
@@ -22,3 +23,10 @@ def s3_object():
     s3_obj._connect_to_client = Mock(return_value=mock_client)
 
     yield s3_obj
+
+
+@pytest.fixture
+def webhook_notifier():
+    return WebhookNotifier(
+        csv_filename="example.csv", s3_url="https://example.com/s3/path/example.csv"
+    )
