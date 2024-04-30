@@ -182,10 +182,7 @@ def upload() -> str | Response:
                                         row["Date Published"],
                                     ),
                                 )
-                S3.upload_s3_file(
-                    session["uploaded_data_file_path"],
-                    s3_file_name
-                )
+                S3.upload_s3_file(session["uploaded_data_file_path"], s3_file_name)
                 location = S3.get_bucket_location()
                 session[
                     "s3_url"
