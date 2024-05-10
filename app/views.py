@@ -14,9 +14,10 @@ from app.methods.isbn import validate_isbn
 from app.models import Account, Book, Buckets, Publisher
 
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
+BUCKET_NAME = app.config["AWS_BUCKET_NAME"]
 
 S3 = S3Object(
-    app.config["AWS_BUCKET_NAME"],
+    BUCKET_NAME,
     app.config["AWS_API_KEY"],
     app.config["AWS_SECRET_KEY"],
 )
