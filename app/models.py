@@ -18,9 +18,9 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     isbn = db.Column(db.String(255), nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
     created_date = db.Column(db.DateTime, server_default=db.func.now())
-    account = db.relationship('Account', backref=db.backref('books', lazy=True))
+    account = db.relationship("Account", backref=db.backref("books", lazy=True))
 
     def __init__(self, title, isbn, account_id):
         self.title = title
@@ -30,11 +30,11 @@ class Book(db.Model):
 
 class Publisher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    books_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    books_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     author = db.Column(db.String(255), nullable=False)
     publisher_name = db.Column(db.String(255), nullable=False)
     publisher_date = db.Column(db.String(255), nullable=False)
-    book = db.relationship('Book', backref=db.backref('publishers', lazy=True))
+    book = db.relationship("Book", backref=db.backref("publishers", lazy=True))
 
     def __init__(self, books_id, author, publisher_name, publisher_date):
         self.books_id = books_id
@@ -48,9 +48,9 @@ class Buckets(db.Model):
     bucket_name = db.Column(db.String(255), nullable=False)
     file_name = db.Column(db.String(255), nullable=False)
     file_path = db.Column(db.String(255), nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('account.id'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey("account.id"), nullable=False)
     uploaded_date = db.Column(db.DateTime, server_default=db.func.now())
-    account = db.relationship('Account', backref=db.backref('aws_s3', lazy=True))
+    account = db.relationship("Account", backref=db.backref("aws_s3", lazy=True))
 
     def __init__(self, bucket_name, file_name, file_path, account_id):
         self.bucket_name = bucket_name

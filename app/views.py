@@ -11,18 +11,7 @@ from app import app, db
 from app.classes.aws import S3Object
 from app.classes.webhook import WebhookNotifier
 from app.methods.isbn import validate_isbn
-from app.models import Account, Book, Publisher
-from app.sql_config import (
-    CREATE_BOOKS_TABLE,
-    CREATE_PUBLISHERS_TABLE,
-    CREATE_S3_TABLE,
-    INSERT_BOOKS,
-    INSERT_PUBLISHERS,
-    INSERT_S3_TABLE,
-    SELECT_ACCOUNT_ID,
-    SELECT_MATCH_USER_BOOKS,
-    SELECT_USERS_BOOKS,
-)
+from app.models import Account, Book, Buckets, Publisher
 
 BUCKET_NAME = "ubiquity-rest-api"
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
@@ -84,9 +73,9 @@ def register() -> str | Response:
     register: This function is used to render the register page of the application.
     """
     if (
-            request.method == "POST"
-            and "email" in request.form
-            and "password" in request.form
+        request.method == "POST"
+        and "email" in request.form
+        and "password" in request.form
     ):
         session["email"] = request.form["email"]
         session["password"] = request.form["password"]
@@ -133,9 +122,9 @@ def upload() -> str | Response:
                     app.config["UPLOAD_FOLDER"], csv_file.filename
                 )
                 with open(
-                        os.path.join(app.config["UPLOAD_FOLDER"], csv_file.filename),
-                        mode="r",
-                        encoding="utf-8-sig"
+                    os.path.join(app.config["UPLOAD_FOLDER"], csv_file.filename),
+                    mode="r",
+                    encoding="utf-8-sig",
                 ) as csv_file_content:
                     csv_reader = csv.DictReader(csv_file_content)
                     for row in csv_reader:
@@ -146,13 +135,20 @@ def upload() -> str | Response:
                                 "public/fail_upload.html", message=message
                             )
 
-                        new_book = Book(title=row["Book Title"], isbn=row["ISBN"], account_id=account_id)
+                        new_book = Book(
+                            title=row["Book Title"],
+                            isbn=row["ISBN"],
+                            account_id=account_id,
+                        )
                         db.session.add(new_book)
                         db.session.commit()
 
-                        new_publisher = Publisher(books_id=new_book.id, author=row["Book Author"],
-                                                  publisher_name=row["Publisher Name"],
-                                                  publisher_date=row["Date Published"])
+                        new_publisher = Publisher(
+                            books_id=new_book.id,
+                            author=row["Book Author"],
+                            publisher_name=row["Publisher Name"],
+                            publisher_date=row["Date Published"],
+                        )
                         db.session.add(new_publisher)
                         db.session.commit()
                 S3.upload_s3_file(session["uploaded_data_file_path"], s3_file_name)
@@ -192,18 +188,14 @@ def file_data() -> str | Response:
         data = pd.read_csv(data_file_path, header=0)
         date_list = list(data.values)
         if request.method == "POST":
-            with CONNECTION:
-                with CONNECTION.cursor() as cursor:
-                    cursor.execute(CREATE_S3_TABLE)
-                    cursor.execute(
-                        INSERT_S3_TABLE,
-                        (
-                            BUCKET_NAME,
-                            session["s3_file_name"],
-                            session["s3_url"],
-                            session["account_id"],
-                        ),
-                    )
+            s3_data = Buckets(
+                bucket_name=BUCKET_NAME,
+                file_name=session["s3_file_name"],
+                file_path=session["s3_url"],
+                account_id=session["account_id"],
+            )
+            db.session.add(s3_data)
+            db.session.commit()
             return redirect("/dashboard")
         elif request.method == "GET":
             return render_template(
@@ -233,14 +225,28 @@ def dashboard() -> str | Response:
     """
     try:
         account_id = Account.query.filter_by(email=session["email"]).first().id
-        user_books = Book.query.filter_by(account_id=account_id).all()
-        match_user_books = db.session.query(
-            Book.account_id,
-            Book.title,
-            Publisher.author,
-            Publisher.publisher_name,
-            Publisher.publisher_date
-        ).join(Publisher).join(Account).filter(Account.id == account_id).order_by(Book.id.desc()).limit(1)
+        user_books = (
+            db.session.query(
+                Buckets.account_id, Buckets.file_name, Buckets.uploaded_date
+            )
+            .join(Account, Account.id == Buckets.account_id)
+            .filter(Account.id == account_id)
+            .all()
+        )
+        match_user_books = (
+            db.session.query(
+                Book.account_id,
+                Book.title,
+                Publisher.author,
+                Publisher.publisher_name,
+                Publisher.publisher_date,
+            )
+            .join(Publisher)
+            .join(Account)
+            .filter(Account.id == account_id)
+            .order_by(Book.id.desc())
+            .limit(1)
+        )
         if session.get("email", None) is None:
             return redirect("/login")
         elif request.method == "GET":
