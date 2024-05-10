@@ -1,39 +1,26 @@
 import csv
-import hashlib
 import json
 import os
 import uuid
 
 import pandas as pd
-import psycopg2
 from flask import Response, redirect, render_template, request, session
 from loguru import logger
 
-from app import app
+from app import app, db
 from app.classes.aws import S3Object
 from app.classes.webhook import WebhookNotifier
 from app.methods.isbn import validate_isbn
-from app.sql_config import (
-    CHECK_ACCOUNTS,
-    CREATE_ACCOUNTS_TABLE,
-    CREATE_BOOKS_TABLE,
-    CREATE_PUBLISHERS_TABLE,
-    CREATE_S3_TABLE,
-    INSERT_ACCOUNTS,
-    INSERT_BOOKS,
-    INSERT_PUBLISHERS,
-    INSERT_S3_TABLE,
-    SELECT_ACCOUNT_ID,
-    SELECT_MATCH_USER_BOOKS,
-    SELECT_USERS_BOOKS,
-)
+from app.models import Account, Book, Buckets, Publisher
 
-CONNECTION = psycopg2.connect(app.config["DATABASE_URI"])
-
-BUCKET_NAME = "ubiquity-rest-api"
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
+BUCKET_NAME = app.config["AWS_BUCKET_NAME"]
 
-S3 = S3Object(BUCKET_NAME, app.config["AWS_API_KEY"], app.config["AWS_SECRET_KEY"])
+S3 = S3Object(
+    BUCKET_NAME,
+    app.config["AWS_API_KEY"],
+    app.config["AWS_SECRET_KEY"],
+)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -63,20 +50,18 @@ def login() -> str | Response:
     if request.method == "POST":
         session["email"] = request.form.get("email")
         session["password"] = request.form.get("password")
-        with CONNECTION:
-            with CONNECTION.cursor() as cursor:
-                cursor.execute(CREATE_ACCOUNTS_TABLE)
-                cursor.execute(CHECK_ACCOUNTS, (session["email"],))
-                account = cursor.fetchone()
-                if account:
-                    logger.success("Account Logged In Successfully!")
-                    return redirect("/dashboard")
-                else:
-                    logger.error("Account does not exists!")
-                    msg = "Account does not exists!"
-                    if request.form.get("Register") == "REG":
-                        return redirect("/register")
-                    return render_template("public/fail_login.html", message=msg)
+
+        account = Account.query.filter_by(email=session["email"]).first()
+
+        if account:
+            logger.success("Account Logged In Successfully!")
+            return redirect("/dashboard")
+        else:
+            logger.error("Account does not exists!")
+            msg = "Account does not exists!"
+            if request.form.get("Register") == "REG":
+                return redirect("/register")
+            return render_template("public/fail_login.html", message=msg)
     elif request.method == "GET":
         return render_template("public/login.html")
     return app.response_class(
@@ -98,22 +83,19 @@ def register() -> str | Response:
     ):
         session["email"] = request.form["email"]
         session["password"] = request.form["password"]
-        session["password"] = hashlib.md5(session["password"].encode()).hexdigest()
-        with CONNECTION:
-            with CONNECTION.cursor() as cursor:
-                cursor.execute(CREATE_ACCOUNTS_TABLE)
-                cursor.execute(CHECK_ACCOUNTS, (session["email"],))
-                account = cursor.fetchone()
-                if account:
-                    msg = "Account already exists!"
-                    logger.error("Account already exists!")
-                    return render_template("public/fail_register.html", message=msg)
-                else:
-                    cursor.execute(
-                        INSERT_ACCOUNTS, (session["email"], str(session["password"]))
-                    )
-                    logger.success("Account created successfully!")
-                    return redirect("/upload")
+
+        account = Account.query.filter_by(email=session["email"]).first()
+
+        if account:
+            msg = "Account already exists!"
+            logger.error("Account already exists!")
+            return render_template("public/fail_register.html", message=msg)
+        else:
+            new_account = Account(email=session["email"], password=session["password"])
+            db.session.add(new_account)
+            db.session.commit()
+            logger.success("Account created successfully!")
+            return redirect("/upload")
     elif request.method == "GET":
         return render_template("public/register.html")
     return app.response_class(
@@ -131,13 +113,8 @@ def upload() -> str | Response:
     if request.method == "POST":
         if request.files:
             try:
-                with CONNECTION:
-                    with CONNECTION.cursor() as cursor:
-                        cursor.execute(CREATE_BOOKS_TABLE)
-                        cursor.execute(CREATE_PUBLISHERS_TABLE)
-                        cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
-                        account_id = cursor.fetchone()[0]
-                        session["account_id"] = account_id
+                account_id = Account.query.filter_by(email=session["email"]).first().id
+                session["account_id"] = account_id
                 csv_file = request.files["uploaded-file"]
                 csv_file.save(
                     os.path.join(app.config["UPLOAD_FOLDER"], csv_file.filename)
@@ -151,6 +128,7 @@ def upload() -> str | Response:
                 with open(
                     os.path.join(app.config["UPLOAD_FOLDER"], csv_file.filename),
                     mode="r",
+                    encoding="utf-8-sig",
                 ) as csv_file_content:
                     csv_reader = csv.DictReader(csv_file_content)
                     for row in csv_reader:
@@ -160,26 +138,23 @@ def upload() -> str | Response:
                             return render_template(
                                 "public/fail_upload.html", message=message
                             )
-                        with CONNECTION:
-                            with CONNECTION.cursor() as cursor:
-                                cursor.execute(
-                                    INSERT_BOOKS,
-                                    (
-                                        row["Book Title"],
-                                        row["ISBN"],
-                                        session["account_id"],
-                                    ),
-                                )
-                                book_id = cursor.fetchone()[0]
-                                cursor.execute(
-                                    INSERT_PUBLISHERS,
-                                    (
-                                        book_id,
-                                        row["Book Author"],
-                                        row["Publisher Name"],
-                                        row["Date Published"],
-                                    ),
-                                )
+
+                        new_book = Book(
+                            title=row["Book Title"],
+                            isbn=row["ISBN"],
+                            account_id=account_id,
+                        )
+                        db.session.add(new_book)
+                        db.session.commit()
+
+                        new_publisher = Publisher(
+                            books_id=new_book.id,
+                            author=row["Book Author"],
+                            publisher_name=row["Publisher Name"],
+                            publisher_date=row["Date Published"],
+                        )
+                        db.session.add(new_publisher)
+                        db.session.commit()
                 S3.upload_s3_file(session["uploaded_data_file_path"], s3_file_name)
                 location = S3.get_bucket_location()
                 session[
@@ -217,18 +192,14 @@ def file_data() -> str | Response:
         data = pd.read_csv(data_file_path, header=0)
         date_list = list(data.values)
         if request.method == "POST":
-            with CONNECTION:
-                with CONNECTION.cursor() as cursor:
-                    cursor.execute(CREATE_S3_TABLE)
-                    cursor.execute(
-                        INSERT_S3_TABLE,
-                        (
-                            BUCKET_NAME,
-                            session["s3_file_name"],
-                            session["s3_url"],
-                            session["account_id"],
-                        ),
-                    )
+            s3_data = Buckets(
+                bucket_name=BUCKET_NAME,
+                file_name=session["s3_file_name"],
+                file_path=session["s3_url"],
+                account_id=session["account_id"],
+            )
+            db.session.add(s3_data)
+            db.session.commit()
             return redirect("/dashboard")
         elif request.method == "GET":
             return render_template(
@@ -257,14 +228,29 @@ def dashboard() -> str | Response:
     dashboard: This function is used to render the dashboard page of the application.
     """
     try:
-        with CONNECTION:
-            with CONNECTION.cursor() as cursor:
-                cursor.execute(SELECT_ACCOUNT_ID, (session["email"],))
-                account_id = cursor.fetchone()[0]
-                cursor.execute(SELECT_USERS_BOOKS, (account_id,))
-                user_books = cursor.fetchall()
-                cursor.execute(SELECT_MATCH_USER_BOOKS, (account_id,))
-                match_user_books = cursor.fetchall()
+        account_id = Account.query.filter_by(email=session["email"]).first().id
+        user_books = (
+            db.session.query(
+                Buckets.account_id, Buckets.file_name, Buckets.uploaded_date
+            )
+            .join(Account, Account.id == Buckets.account_id)
+            .filter(Account.id == account_id)
+            .all()
+        )
+        match_user_books = (
+            db.session.query(
+                Book.account_id,
+                Book.title,
+                Publisher.author,
+                Publisher.publisher_name,
+                Publisher.publisher_date,
+            )
+            .join(Publisher)
+            .join(Account)
+            .filter(Account.id == account_id)
+            .order_by(Book.id.desc())
+            .limit(1)
+        )
         if session.get("email", None) is None:
             return redirect("/login")
         elif request.method == "GET":

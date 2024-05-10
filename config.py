@@ -1,7 +1,13 @@
 import secrets
 from pathlib import Path
 
-from app.environment import AWS_API_KEY, AWS_SECRET_KEY, DATABASE_URI, ENV_KEY
+from app.environment import (
+    AWS_API_KEY,
+    AWS_BUCKET_NAME,
+    AWS_SECRET_KEY,
+    DATABASE_URI,
+    ENV_KEY,
+)
 
 RELATIVE_UPLOAD_FOLDER = Path("app/static/uploads")
 
@@ -10,9 +16,11 @@ class Config(object):
     ENV = ENV_KEY
     DEBUG = False
     TESTING = False
+    AWS_BUCKET_NAME = AWS_BUCKET_NAME
     AWS_API_KEY = AWS_API_KEY
     AWS_SECRET_KEY = AWS_SECRET_KEY
-    DATABASE_URI = DATABASE_URI
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     ALLOWED_EXTENSIONS = ["CSV"]
     UPLOAD_FOLDER = Path(__file__).resolve().parent / RELATIVE_UPLOAD_FOLDER
     SESSION_COOKIE_SECURE = True
