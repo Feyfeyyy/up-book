@@ -1,7 +1,13 @@
 import secrets
 from pathlib import Path
 
-from app.environment import AWS_API_KEY, AWS_SECRET_KEY, DATABASE_URI, ENV_KEY
+from app.environment import (
+    AWS_API_KEY,
+    AWS_BUCKET_NAME,
+    AWS_SECRET_KEY,
+    DATABASE_URI,
+    ENV_KEY,
+)
 
 RELATIVE_UPLOAD_FOLDER = Path("app/static/uploads")
 
@@ -10,6 +16,7 @@ class Config(object):
     ENV = ENV_KEY
     DEBUG = False
     TESTING = False
+    AWS_BUCKET_NAME = AWS_BUCKET_NAME
     AWS_API_KEY = AWS_API_KEY
     AWS_SECRET_KEY = AWS_SECRET_KEY
     SQLALCHEMY_DATABASE_URI = DATABASE_URI

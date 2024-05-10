@@ -13,10 +13,13 @@ from app.classes.webhook import WebhookNotifier
 from app.methods.isbn import validate_isbn
 from app.models import Account, Book, Buckets, Publisher
 
-BUCKET_NAME = "ubiquity-rest-api"
 WEBHOOK_URL = app.config["WEBHOOK_URL"]
 
-S3 = S3Object(BUCKET_NAME, app.config["AWS_API_KEY"], app.config["AWS_SECRET_KEY"])
+S3 = S3Object(
+    app.config["AWS_BUCKET_NAME"],
+    app.config["AWS_API_KEY"],
+    app.config["AWS_SECRET_KEY"],
+)
 
 
 @app.route("/", methods=["GET", "POST"])
