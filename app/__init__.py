@@ -7,6 +7,7 @@ from app.extensions import db
 load_dotenv(".env")
 app = Flask(__name__)
 app.config.from_pyfile("environment.py")
+app.app_context().push()
 
 if app.config["ENV_KEY"] == "production":
     app.config.from_object("config.ProductionConfig")
