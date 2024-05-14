@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+from botocore.exceptions import BotoCoreError
 
 from app.classes.aws import S3Object
 from app.classes.webhook import WebhookNotifier
@@ -23,6 +24,16 @@ def s3_object():
     s3_obj._connect_to_client = Mock(return_value=mock_client)
 
     yield s3_obj
+
+
+@pytest.fixture
+def mock_successful_connection(mocker):
+    return mocker.patch("boto3.Session.resource")
+
+
+@pytest.fixture
+def mock_failed_connection(mocker):
+    return mocker.patch("boto3.Session.resource", side_effect=BotoCoreError)
 
 
 @pytest.fixture

@@ -1,14 +1,40 @@
 from unittest.mock import Mock
 
 import pytest
+from botocore.exceptions import BotoCoreError
+
+from app.classes.aws import S3Object
 
 
 class TestAWSS3Object:
-    def test_connect_to_client_success(self, s3_object):
-        assert s3_object._connect_to_client() is not None
+    def test_connect_to_client_success(self, mock_successful_connection):
+        instance = S3Object(
+            bucket_name="test_bucket",
+            aws_access_key_id="access_key",
+            aws_secret_access_key="secret_key",
+        )
+        assert instance._connect_to_client() is not None
+        assert mock_successful_connection.called
+        assert instance._connect_to_client() == mock_successful_connection.return_value
 
-    def test_get_client_success(self, s3_object):
-        assert s3_object.get_client() is not None
+    def test_get_client_success(self, mock_successful_connection):
+        instance = S3Object(
+            bucket_name="test_bucket",
+            aws_access_key_id="access_key",
+            aws_secret_access_key="secret_key",
+        )
+        assert instance.get_client() is not None
+        assert mock_successful_connection.called
+        assert instance.get_client() == mock_successful_connection.return_value
+
+    def test_connect_to_client_failure(self, mock_failed_connection):
+        instance = S3Object(
+            bucket_name="test_bucket",
+            aws_access_key_id="access_key",
+            aws_secret_access_key="secret_key",
+        )
+        with pytest.raises(BotoCoreError):
+            instance._connect_to_client()
 
     def test_get_bucket_location_success(self, s3_object):
         mock_client = s3_object.get_client()
